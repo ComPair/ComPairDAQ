@@ -20,12 +20,11 @@ TEST_CASE("COMMAND_PACKET") {
 		//Loop over all pairs of type defined above and check that we get the correct type.
 		for (auto pair : types) {
 			data.at(0) = pair.second;
+			if (pair.first == CmdPacket::Destination::SI_TR) data.at(1) = 0x1;
+			else data.at(1) = 0x0;
 			p.ParseData(data);
 			REQUIRE(p.GetDestination() == pair.first);
 		}
-
-		//Reset first word
-		data.at(0) = 0x0;
 	}
 
 	SECTION("Si Tracker Tests") {
@@ -53,11 +52,30 @@ TEST_CASE("COMMAND_PACKET") {
 		REQUIRE_THROWS(p.ParseData(data));
 
 		//CZT destination with a silicon tracker bit set
-		data.at(0) = types.at(2).second + 0x1;
+		data.at(0) = types.at(2).second | 0x1;
 		REQUIRE_THROWS(p.ParseData(data));
 		REQUIRE(p.GetDestination() == CmdPacket::Destination::CZT);
 
-		//Reset first word
-		data.at(0) = 0;
+		//CZT destination with a silicon tracker bit set
+		data.at(0) = types.at(2).second;
+		data.at(1) = 0x1;
+		REQUIRE_THROWS(p.ParseData(data));
+		REQUIRE(p.GetDestination() == CmdPacket::Destination::CZT);
+		//Si Tracker is set to 0, even though we have an invalid destination.
+		REQUIRE(p.GetSiTracker() == 0);
+
+		//Si Tracker destination with no si tracker flag
+		data.at(0) = types.at(1).second;
+		data.at(1) = 0x0;
+		REQUIRE_THROWS(p.ParseData(data));
+		REQUIRE(p.GetDestination() == CmdPacket::Destination::SI_TR);
+		REQUIRE(p.GetSiTracker() == -1);
+
+		//Si Tracker destination with multiple si tracker flags
+		data.at(1) = 0x3;
+		REQUIRE_THROWS(p.ParseData(data));
+		REQUIRE(p.GetDestination() == CmdPacket::Destination::SI_TR);
+		REQUIRE(p.GetSiTracker() == -1);
+
 	}
 }

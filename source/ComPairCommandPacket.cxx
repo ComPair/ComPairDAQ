@@ -39,6 +39,11 @@ void ComPairCommandPacket::ParseDestination(uint8_t firstWord, uint8_t secondWor
 		throw std::runtime_error("Invalid type in command packet, type is not a Si Tracker, but a Si Tracker bit is set.");
 	}
 
+	// Check if the si tracker index flag is set for si tracker type packets.
+	if (destination_ == Destination::SI_TR && siTracker_ == -1) {
+		throw std::runtime_error("Invalid type in command packet, si tracker type found with invalid SiTracker layer information.");
+	}
+
 	// The MSB of the first word should be 0
 	if (firstWord & 0x80) {
 		throw std::runtime_error("Invalid type in command packet, MSB is set.");
