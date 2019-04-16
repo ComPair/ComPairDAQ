@@ -5,6 +5,8 @@
 bool ComPairCommandPacket::ParseData(std::vector< uint8_t > &data) {
 	//Parse the first two words for the destination
 	destination_ = ParseDestination(data.at(0), data.at(1));
+	command_ = data.at(2);
+	address_ = data.at(3);
 
 	return true;
 }

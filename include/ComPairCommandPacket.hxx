@@ -22,6 +22,8 @@ class ComPairCommandPacket {
 
 	private:
 		Destination destination_;
+		uint8_t command_;
+		uint8_t address_;
 
 		Destination ParseDestination(uint8_t firstWord, uint8_t secondWord);
 
