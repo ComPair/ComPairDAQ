@@ -14,6 +14,14 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 message(STATUS "Installing to ${CMAKE_INSTALL_PREFIX}")
 
+option(tests "Enable tests" OFF)
+
 include_directories(include)
 add_subdirectory(source)
+
+if(${tests})
+	enable_testing()
+	add_subdirectory(Catch)
+	add_subdirectory(tests)
+endif(${tests})
 
