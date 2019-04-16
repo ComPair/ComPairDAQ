@@ -1,0 +1,6 @@
+#Vim Temporaries
+*.*swp
+
+#Default build spaces
+build
+install

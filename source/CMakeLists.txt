@@ -1,0 +1,1 @@
+add_library(ComPairPackets STATIC ComPairSubsystemEventPacket.cxx)
