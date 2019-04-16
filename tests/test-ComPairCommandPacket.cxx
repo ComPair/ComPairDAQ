@@ -46,11 +46,20 @@ TEST_CASE("COMMAND_PACKET") {
 
 	}
 
-	SECTION("Bad Data Test") {
-		//Data with the MSB set.
+	SECTION("Data Command") {
+		//Data with the MSB set indicating the packet has data.
 		data.at(0) = 0x0 + 0x80;
-		REQUIRE_THROWS(p.ParseData(data));
+		p.ParseData(data);
+		REQUIRE(p.HasData() == true);
 
+		//Data with the MSB not set indicating the packet has no data.
+		data.at(0) = 0x0;
+		p.ParseData(data);
+		REQUIRE(p.HasData() == false);
+	}
+
+
+	SECTION("Bad Data Test") {
 		//CZT destination with a silicon tracker bit set
 		data.at(0) = types.at(2).second | 0x1;
 		REQUIRE_THROWS(p.ParseData(data));

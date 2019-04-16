@@ -2,21 +2,27 @@
 
 #include <stdexcept>
 
-bool ComPairCommandPacket::ParseData(std::vector< uint8_t > &data) {
+void ComPairCommandPacket::ParseData(std::vector< uint8_t > &data) {
+	//Parse whether this command has data.
+	ParseType(data.at(0));
+
 	//Parse the first two words for the destination
 	ParseDestination(data.at(0), data.at(1));
+
 	command_ = data.at(2);
 	address_ = data.at(3);
-
-	return true;
 }
 
-void ComPairCommandPacket::ParseDestination(uint8_t firstWord, uint8_t secondWord) {
+void ComPairCommandPacket::ParseType(const uint8_t &firstWord) {
+	hasData_ = (firstWord & 0x80) >> 7;
+}
+
+void ComPairCommandPacket::ParseDestination(const uint8_t &firstWord, const uint8_t &secondWord) {
 	typedef ComPairCommandPacket::Destination Destination;
 
 	destination_ = Destination::UNKNOWN;
 
-	// Mask first word to get the subsytem type
+	// Mask first word to get the subsystem type
 	destination_ = static_cast< Destination >(firstWord & 0x7C);
 
 	siTracker_ = -1;
@@ -44,8 +50,4 @@ void ComPairCommandPacket::ParseDestination(uint8_t firstWord, uint8_t secondWor
 		throw std::runtime_error("Invalid type in command packet, si tracker type found with invalid SiTracker layer information.");
 	}
 
-	// The MSB of the first word should be 0
-	if (firstWord & 0x80) {
-		throw std::runtime_error("Invalid type in command packet, MSB is set.");
-	}
 }

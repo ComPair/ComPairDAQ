@@ -6,7 +6,7 @@
 
 class ComPairCommandPacket {
 	public:
-		bool ParseData(std::vector< uint8_t > &data);
+		void ParseData(std::vector< uint8_t > &data);
 
 		enum class Destination {
 			UNKNOWN = 0x0,
@@ -19,6 +19,7 @@ class ComPairCommandPacket {
 
 		Destination GetDestination() {return destination_;}
 		short GetSiTracker() {return siTracker_;}
+		bool HasData() {return hasData_;}
 		void SetDestination(Destination dest) {destination_ = dest;}
 
 	private:
@@ -26,8 +27,11 @@ class ComPairCommandPacket {
 		uint8_t command_;
 		uint8_t address_;
 		short siTracker_;
+		bool hasData_;
+		uint16_t data_;
 
-		void ParseDestination(uint8_t firstWord, uint8_t secondWord);
+		void ParseDestination(const uint8_t &firstWord, const uint8_t &secondWord);
+		void ParseType(const uint8_t &firstWord);
 
 };
 
