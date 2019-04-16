@@ -1,8 +1,6 @@
 #include <stdexcept>
 #include "ComPairEventPacket.hxx"
 
-#include <iostream>
-
 // Parse raw data buffer at `buf`.
 bool ComPairEventPacket::ParseData(const std::vector<uint16_t> &buf) {
     uint16_t check_size;

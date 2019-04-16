@@ -32,6 +32,23 @@ TEST_CASE("EVENT_PACKET") {
         REQUIRE(ev_packet.get_type() == ComPairEventPacket::PacketType::MONITOR_PACKET);
     }
 
+    SECTION("Test setting seconds and useconds correctly") {
+        std::vector<uint16_t> data0 = {14, 0x0001 | 0x0800, 0, 1, 0, 2, 14};
+        REQUIRE(ev_packet.ParseData(data0) == true);
+        REQUIRE(ev_packet.get_seconds() == 1);
+        REQUIRE(ev_packet.get_useconds() == 2);
+
+        std::vector<uint16_t> data1 = {14, 0x0001 | 0x0800, 1, 0, 2, 0, 14};
+        REQUIRE(ev_packet.ParseData(data1) == true);
+        REQUIRE(ev_packet.get_seconds() == (1<<16));
+        REQUIRE(ev_packet.get_useconds() == (2<<16));
+
+        std::vector<uint16_t> data2 = {14, 0x0001 | 0x0800, 1, 2, 3, 4, 14};
+        REQUIRE(ev_packet.ParseData(data2) == true);
+        REQUIRE(ev_packet.get_seconds() == (1<<16 | 2));
+        REQUIRE(ev_packet.get_useconds() == (3<<16 | 4));
+    }
+
 }
 
 
