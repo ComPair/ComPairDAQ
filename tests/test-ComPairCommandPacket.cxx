@@ -2,26 +2,32 @@
 
 #include "ComPairCommandPacket.hxx"
 
+#include <vector>
+#include <map>
+
 typedef ComPairCommandPacket CmdPacket;
 
 TEST_CASE("COMMAND_PACKET") {
+	//Create a dummy packet to be reused.
 	CmdPacket p;
+	//Create a vector of data to be used as a template.
 	std::vector< uint8_t > data = {0x0, 0x0, 0x4, 0x0};
 
-	std::vector< std::pair< CmdPacket::Destination, uint8_t > > types = {
-			std::make_pair(CmdPacket::Destination::ACD, 0x4),
-			std::make_pair(CmdPacket::Destination::SI_TR, 0x8),
-			std::make_pair(CmdPacket::Destination::CZT, 0x10),
-			std::make_pair(CmdPacket::Destination::CSI, 0x20),
-			std::make_pair(CmdPacket::Destination::TRIG, 0x40),
+	//Create a  map of the various types to their respective flags.
+	std::map< CmdPacket::Destination, uint8_t > types = {
+			{CmdPacket::Destination::ACD, 0x4},
+			{CmdPacket::Destination::SI_TR, 0x8},
+			{CmdPacket::Destination::CZT, 0x10},
+			{CmdPacket::Destination::CSI, 0x20},
+			{CmdPacket::Destination::TRIG, 0x40},
 		};
 
 	SECTION("Type Test") {
 		//Loop over all pairs of type defined above and check that we get the correct type.
 		for (auto pair : types) {
 			data.at(0) = pair.second;
-			if (pair.first == CmdPacket::Destination::SI_TR) data.at(1) = 0x1;
-			else data.at(1) = 0x0;
+			//Check the silicon tracker separately.
+			if (pair.first == CmdPacket::Destination::SI_TR) continue;
 			p.ParseData(data);
 			REQUIRE(p.GetDestination() == pair.first);
 		}
@@ -29,7 +35,7 @@ TEST_CASE("COMMAND_PACKET") {
 
 	SECTION("Si Tracker Tests") {
 		//Set the data type to the silicon tracker
-		data.at(0) = types.at(1).second;
+		data.at(0) = types[CmdPacket::Destination::SI_TR];
 
 		// Loop over possible silicon tracker indexes and set the appropriate bit.
 		for (short siIndex = 0; siIndex < 10; siIndex++) {
@@ -37,10 +43,11 @@ TEST_CASE("COMMAND_PACKET") {
 				data.at(1) = 0x1 << siIndex;
 			}
 			else {
-				data.at(0) = types.at(1).second | (0x1 << (siIndex - 8));
+				data.at(0) = types[CmdPacket::Destination::SI_TR] | (0x1 << (siIndex - 8));
 				data.at(1) = 0x0;
 			}
 			p.ParseData(data);
+			REQUIRE(p.GetDestination() == CmdPacket::Destination::SI_TR);
 			REQUIRE(p.GetSiTracker() == siIndex);
 		}
 
@@ -61,12 +68,12 @@ TEST_CASE("COMMAND_PACKET") {
 
 	SECTION("Bad Data Test") {
 		//CZT destination with a silicon tracker bit set
-		data.at(0) = types.at(2).second | 0x1;
+		data.at(0) = types[CmdPacket::Destination::CZT] | 0x1;
 		REQUIRE_THROWS(p.ParseData(data));
 		REQUIRE(p.GetDestination() == CmdPacket::Destination::CZT);
 
 		//CZT destination with a silicon tracker bit set
-		data.at(0) = types.at(2).second;
+		data.at(0) = types[CmdPacket::Destination::CZT];
 		data.at(1) = 0x1;
 		REQUIRE_THROWS(p.ParseData(data));
 		REQUIRE(p.GetDestination() == CmdPacket::Destination::CZT);
@@ -74,7 +81,7 @@ TEST_CASE("COMMAND_PACKET") {
 		REQUIRE(p.GetSiTracker() == 0);
 
 		//Si Tracker destination with no si tracker flag
-		data.at(0) = types.at(1).second;
+		data.at(0) = types[CmdPacket::Destination::SI_TR];
 		data.at(1) = 0x0;
 		REQUIRE_THROWS(p.ParseData(data));
 		REQUIRE(p.GetDestination() == CmdPacket::Destination::SI_TR);
