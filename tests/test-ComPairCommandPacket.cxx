@@ -23,8 +23,28 @@ TEST_CASE("COMMAND_PACKET") {
 			p.ParseData(data);
 			REQUIRE(p.GetDestination() == pair.first);
 		}
+
 		//Reset first word
 		data.at(0) = 0x0;
+	}
+
+	SECTION("Si Tracker Tests") {
+		//Set the data type to the silicon tracker
+		data.at(0) = types.at(1).second;
+
+		// Loop over possible silicon tracker indexes and set the appropriate bit.
+		for (short siIndex = 0; siIndex < 10; siIndex++) {
+			if (siIndex < 8) {
+				data.at(1) = 0x1 << siIndex;
+			}
+			else {
+				data.at(0) = types.at(1).second | (0x1 << (siIndex - 8));
+				data.at(1) = 0x0;
+			}
+			p.ParseData(data);
+			REQUIRE(p.GetSiTracker() == siIndex);
+		}
+
 	}
 
 	SECTION("Bad Data Test") {
@@ -34,9 +54,10 @@ TEST_CASE("COMMAND_PACKET") {
 
 		//CZT destination with a silicon tracker bit set
 		data.at(0) = types.at(2).second + 0x1;
-		p.ParseData(data);
+		REQUIRE_THROWS(p.ParseData(data));
 		REQUIRE(p.GetDestination() == CmdPacket::Destination::CZT);
 
+		//Reset first word
 		data.at(0) = 0;
 	}
 }

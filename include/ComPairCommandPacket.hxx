@@ -18,14 +18,16 @@ class ComPairCommandPacket {
 		};
 
 		Destination GetDestination() {return destination_;}
+		short GetSiTracker() {return siTracker_;}
 		void SetDestination(Destination dest) {destination_ = dest;}
 
 	private:
 		Destination destination_;
 		uint8_t command_;
 		uint8_t address_;
+		short siTracker_;
 
-		Destination ParseDestination(uint8_t firstWord, uint8_t secondWord);
+		void ParseDestination(uint8_t firstWord, uint8_t secondWord);
 
 };
 
