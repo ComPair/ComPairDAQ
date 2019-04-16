@@ -4,3 +4,4 @@
 #Default build spaces
 build
 install
+doc/html

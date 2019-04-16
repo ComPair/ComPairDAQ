@@ -13,6 +13,9 @@ void ComPairCommandPacket::ParseData(std::vector< uint8_t > &data) {
 	address_ = data.at(3);
 }
 
+/** Parse the command packet type based on the MSB from the first word.
+ * \param[in] firstWord The first word from the command packet.
+ */
 void ComPairCommandPacket::ParseType(const uint8_t &firstWord) {
 	hasData_ = (firstWord & 0x80) >> 7;
 }
