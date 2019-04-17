@@ -1,13 +1,13 @@
-ComPair DAQ
+# ComPair DAQ
 
-# Build Instructions
+## Build Instructions
 ```
 mkdir build
 cmake ..
 make -j install
 ```
 
-# Running Tests
+## Running Tests
 Tests must be enabled with the a CMake option and then can be run via a number
 of methods. The simplest prescription is as follows:
 ```
@@ -21,9 +21,11 @@ More verbose output can be found by running `ctest`:
 ctest --verbose
 ```
 
-# Documentation
+## Documentation
 Code docuemntation can be genreated with doxygen.
 ```
 doxygen doc/Doxyfile
 ```
-One can include the tests as well by using `Doxyfile_wTests`.
+One can include the tests as well by using `Doxyfile_wTests`. The output is
+generated in `doc/html`.
+
