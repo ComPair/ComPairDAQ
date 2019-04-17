@@ -36,6 +36,19 @@ bool ComPairEventPacket::ParseData(const std::vector<uint16_t> &buf) {
     //subsys_iter = auto buf.begin() + 4;
     //CompairSubsystemEventPacket subsys_event_packet;
     //subsys_event_packet.ParseData(&subsys_iter);
+    //
+    std::vector< uint16_t > subsystemBuf (buf.begin() + 6, buf.begin() + packet_size - 1);
+    switch(source) {
+        case(ComPairEventPacket::PacketSource::SIM_SOURCE):
+            event_packet = new SimSubsystemEventPacket();
+            event_packet->ParseData(subsystemBuf);
+            break;
+        case(ComPairEventPacket::PacketSource::Si0_SOURCE):
+            break;
+        default:
+            //throw std::runtime_error("Unknown packet source.");
+            break;
+    }
 
     // Deal with the packet attribute:
     // Determine if this is event or monitor packet:

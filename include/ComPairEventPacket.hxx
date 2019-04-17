@@ -29,18 +29,20 @@ class ComPairEventPacket {
             TRG_SOURCE = 0x4000,
             SIM_SOURCE = 0x000F
         };
-		bool ParseData(const std::vector<uint16_t> &data);
+        bool ParseData(const std::vector<uint16_t> &data);
         PacketType get_type() { return packet_type; };
         PacketSource get_source() { return source; };
         uint32_t get_seconds() { return seconds; };
         uint32_t get_useconds() { return useconds; };
+        ComPairSubsystemEventPacket* GetSubsystemPacket() {return event_packet;}
+
 	private:
         uint16_t packet_size; // Packet size in bytes.
         PacketType packet_type;
         PacketSource source;  // From packet attribute. 
         uint32_t seconds;
         uint32_t useconds;
-        //ComPairSubsystemEventPacket event_packet;
+        ComPairSubsystemEventPacket *event_packet;
 };
 
 #endif
