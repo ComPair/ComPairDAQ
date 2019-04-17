@@ -5,3 +5,6 @@
 build
 install
 doc/html
+
+# Created by doxygen
+doc/doxygen_sqlite3.db

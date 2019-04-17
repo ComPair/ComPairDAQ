@@ -8,3 +8,6 @@ add_executable(test-ComPairEventPacket test-ComPairEventPacket.cxx)
 target_link_libraries(test-ComPairEventPacket Catch ComPairPackets)
 add_test(test-ComPairEventPacket test-ComPairEventPacket)
 
+add_executable(test-ComPairSubsystemPacket test-ComPairSubsystemPacket.cxx)
+target_link_libraries(test-ComPairSubsystemPacket Catch ComPairPackets)
+add_test(test-ComPairSubsystemPacket test-ComPairSubsystemPacket)
