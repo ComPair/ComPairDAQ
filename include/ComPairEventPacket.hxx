@@ -26,7 +26,8 @@ class ComPairEventPacket {
             Si_SOURCE  = 0x0800,
             CZT_SOURCE = 0x1000,
             CsI_SOURCE = 0x2000,
-            TRG_SOURCE = 0x4000
+            TRG_SOURCE = 0x4000,
+            SIM_SOURCE = 0x000F
         };
 		bool ParseData(const std::vector<uint16_t> &data);
         PacketType get_type() { return packet_type; };
