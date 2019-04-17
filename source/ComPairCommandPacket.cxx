@@ -2,15 +2,28 @@
 
 #include <stdexcept>
 
-void ComPairCommandPacket::ParseData(std::vector< uint8_t > &data) {
-	//Parse whether this command has data.
-	ParseType(data.at(0));
+void ComPairCommandPacket::Parse(std::vector< uint8_t > &packet) {
+	//Parse whether this command has packet.
+	ParseType(packet.at(0));
+
+	if (hasData_) {
+		if (packet.size() != 6) {
+			throw std::runtime_error("Invalid length command packet with data.");
+		}
+		//Parse the command data.
+		data_ = (packet.at(4) << 8) | packet.at(5);
+	}
+	else {
+		if (packet.size() != 4) {
+			throw std::runtime_error("Invalid length command packet without data.");
+		}
+	}
 
 	//Parse the first two words for the destination
-	ParseDestination(data.at(0), data.at(1));
+	ParseDestination(packet.at(0), packet.at(1));
 
-	command_ = data.at(2);
-	address_ = data.at(3);
+	command_ = packet.at(2);
+	address_ = packet.at(3);
 }
 
 /** Parse the command packet type based on the MSB from the first word.
@@ -53,4 +66,63 @@ void ComPairCommandPacket::ParseDestination(const uint8_t &firstWord, const uint
 		throw std::runtime_error("Invalid type in command packet, si tracker type found with invalid SiTracker layer information.");
 	}
 
+}
+
+void ComPairCommandPacket::SetDestination(
+		ComPairCommandPacket::Destination dest,
+		short siTracker /* = -1 */)
+{
+	if (dest != ComPairCommandPacket::Destination::SI_TR
+		 && siTracker >= 0) {
+		throw std::runtime_error("Command Packet Destination Si Tracker can not be set when the destination is not the Si Tracker!");
+	}
+	if (dest == ComPairCommandPacket::Destination::SI_TR
+		 && (siTracker < 0 || siTracker > 9)) {
+		throw std::runtime_error("Command Packer Si Tracker Destination is invalid!");
+	}
+
+	destination_ = dest;
+	siTracker_ = siTracker;
+}
+
+void ComPairCommandPacket::SetData(uint16_t data) {
+	hasData_ = true;
+	data_ = data;
+}
+
+/** Create a vector of 8 bit words representing the packet.
+ */
+std::vector< uint8_t > ComPairCommandPacket::GetPacket() {
+	std::vector< uint8_t > packet(4, 0);
+
+	// Set the destination
+	packet.at(0) = static_cast< uint8_t > (destination_);
+	// Set the Si Tracker bits
+	if (siTracker_ < 8) {
+		packet.at(1) = 0x1 << siTracker_;
+	}
+	else {
+		packet.at(0) |= 0x1 << (siTracker_ - 8);
+	}
+
+	// Set the command and address.
+	packet.at(2) = command_;
+	packet.at(3) = address_;
+
+	// If this command has data set the data flag bit and the data bits.
+	if (hasData_) {
+		packet.push_back(data_ & 0xFF);
+		packet.push_back((data_ >> 16) & 0xFF);
+		packet.at(0) |= 0x80;
+	}
+
+	return packet;
+}
+
+uint16_t ComPairCommandPacket::GetData() {
+	if ( ! hasData_) {
+		throw std::runtime_error("Requested data from packet with no data!");
+	}
+
+	return data_;
 }

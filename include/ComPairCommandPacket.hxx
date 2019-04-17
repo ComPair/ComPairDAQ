@@ -10,7 +10,11 @@
  */
 class ComPairCommandPacket {
 	public:
-		void ParseData(std::vector< uint8_t > &data);
+		// Default constructor
+		ComPairCommandPacket() : hasData_(false) {}
+
+		// Parses a command packet.
+		void Parse(std::vector< uint8_t > &packet);
 
 		/// Command destinations mapped to their respective values.
 		enum class Destination {
@@ -26,11 +30,27 @@ class ComPairCommandPacket {
 		Destination GetDestination() {return destination_;}
 		/// Returns the Si Tracker associated to this command.
 		short GetSiTracker() {return siTracker_;}
-		/// Returns whether the command hass data associated with it.
+		/// Returns the command for this command packet.
+		uint8_t GetCommand() {return command_;}
+		/// Returns the address for this command packet.
+		uint8_t GetAddress() {return address_;}
+		/// Returns whether the command has data associated with it.
 		bool HasData() {return hasData_;}
+		/// Returns the data value.
+		uint16_t GetData();
 
 		/// Sets the command destination.
-		void SetDestination(Destination dest) {destination_ = dest;}
+		void SetDestination(Destination dest, short siTracker_=-1);
+		/// Set the data value.
+		void SetData(uint16_t data);
+		/// Set the command and address.
+		void SetCommand(uint8_t command, uint8_t address) {
+			command_ = command;
+			address_ = address;
+		}
+
+		/// Get the raw data packet.
+		std::vector< uint8_t > GetPacket();
 
 	private:
 		/// Flag indicating data.
