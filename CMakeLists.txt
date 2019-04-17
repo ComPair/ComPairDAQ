@@ -25,3 +25,5 @@ if(${tests})
 	add_subdirectory(tests)
 endif(${tests})
 
+install(DIRECTORY include DESTINATION ${CMAKE_INSTALL_PREFIX})
+
