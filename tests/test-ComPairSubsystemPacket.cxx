@@ -1,6 +1,7 @@
 #include "catch.hpp"
 
-#include "ComPairEventPacket.hxx"
+//#include "ComPairEventPacket.hxx"
+#include "ComPairSubsystemEventPacket.hxx"
 
 TEST_CASE("TRIVIAL_SUBSYSTEM_PACKET") {
 
@@ -25,7 +26,7 @@ TEST_CASE("TRIVIAL_SUBSYSTEM_PACKET") {
         REQUIRE(ss_packet.get_crc() == 1);
     }
 
-    SECTION("Test more interesting set of values") {
+    SECTION("Test interpreting packet of all 1's") {
         std::vector<uint16_t> data = {0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF};
         REQUIRE(ss_packet.ParseData(data) == true);
         REQUIRE(ss_packet.get_packet_header() == 0xFFF);
@@ -34,47 +35,55 @@ TEST_CASE("TRIVIAL_SUBSYSTEM_PACKET") {
         REQUIRE(ss_packet.get_event_id() == 0x7FFFFFFF);
         REQUIRE(ss_packet.get_crc() == 0xFFFF);
     }
+}
 
-    /*
-    SECTION("Test that we parse source correctly") {
-        // This should end up being the Si0_SOURCE:
-        std::vector<uint16_t> data = {14, 0x0001 | 0x0800, 0, 1, 0, 2, 14};
-        REQUIRE(ev_packet.ParseData(data) == true);
-        REQUIRE(ev_packet.get_source() == ComPairEventPacket::PacketSource::Si0_SOURCE);
+TEST_CASE("SIM_SUBSYSTEM_PACKET") {
+
+    SimSubsystemEventPacket sim_packet;
+
+    SECTION("Test SimSubsystemEventPacket::set_event_data") {
+        std::vector<float> x = {1.0, 2.0};
+        std::vector<float> y = {3.0, 4.0};
+        std::vector<float> z = {5.0, 6.0};
+        std::vector<float> E = {7.0, 8.0};
+        sim_packet.set_event_data(x, y, z, E);
+        REQUIRE(sim_packet.get_nhit() == 2);
+        for (int i=0; i<2; i++) {
+            REQUIRE(sim_packet.get_hit_x(i) == x.at(i));
+            REQUIRE(sim_packet.get_hit_y(i) == y.at(i));
+            REQUIRE(sim_packet.get_hit_z(i) == z.at(i));
+            REQUIRE(sim_packet.get_hit_E(i) == E.at(i));
+        }
     }
 
-    SECTION("Test that we are setting the packet type correctly to EVENT_PACKET") {
-        std::vector<uint16_t> data = {14, 0x0001 | 0x0800 | 1<<15, 0, 1, 0, 2, 14};
-        REQUIRE(ev_packet.ParseData(data) == true);
-        REQUIRE(ev_packet.get_source() == ComPairEventPacket::PacketSource::Si0_SOURCE);
-        REQUIRE(ev_packet.get_type() == ComPairEventPacket::PacketType::EVENT_PACKET);
+    SECTION("Test simple parsing of sim data") {
+        std::vector<uint16_t> data;
+        data.resize(13); // single hit: size is 6 + 8*nhit
+        // Set header and check-sum:
+        data.at(0) = 0xFFFF;
+        data.at(1) = 0xFFFF;
+        data.at(2) = 0xFFFF;
+        data.at(12) = 0xFFFF;
+
+        data.at(3) = 1; // Setting number of hits
+        // x, y, z, E: 1.0, 2.0, 3.0, 4.0
+        float fval = 1.0;
+        int indx = 4;
+        uint32_t *uval = reinterpret_cast<uint32_t *>(&fval); 
+        uint16_t mshalf, lshalf;
+        for (int cnt=0; cnt<4; cnt++) {
+            mshalf = (*uval >> 16) & 0x0000FFFF;
+            lshalf = *uval & 0x0000FFFF;
+            data.at(indx++) = mshalf;
+            data.at(indx++) = lshalf;
+            fval += 1.0;
+        }
+        REQUIRE(sim_packet.ParseData(data) == true);
+        REQUIRE(sim_packet.get_hit_x(0) == 1.0);
+        REQUIRE(sim_packet.get_hit_y(0) == 2.0);
+        REQUIRE(sim_packet.get_hit_z(0) == 3.0);
+        REQUIRE(sim_packet.get_hit_E(0) == 4.0);
     }
-
-    SECTION("Test that we are setting the packet type to MONITOR_PACKET") {
-        std::vector<uint16_t> data = {14, 0x0001 | 0x0800, 0, 1, 0, 2, 14};
-        REQUIRE(ev_packet.ParseData(data) == true);
-        REQUIRE(ev_packet.get_source() == ComPairEventPacket::PacketSource::Si0_SOURCE);
-        REQUIRE(ev_packet.get_type() == ComPairEventPacket::PacketType::MONITOR_PACKET);
-    }
-
-    SECTION("Test setting seconds and useconds correctly") {
-        std::vector<uint16_t> data0 = {14, 0x0001 | 0x0800, 0, 1, 0, 2, 14};
-        REQUIRE(ev_packet.ParseData(data0) == true);
-        REQUIRE(ev_packet.get_seconds() == 1);
-        REQUIRE(ev_packet.get_useconds() == 2);
-
-        std::vector<uint16_t> data1 = {14, 0x0001 | 0x0800, 1, 0, 2, 0, 14};
-        REQUIRE(ev_packet.ParseData(data1) == true);
-        REQUIRE(ev_packet.get_seconds() == (1<<16));
-        REQUIRE(ev_packet.get_useconds() == (2<<16));
-
-        std::vector<uint16_t> data2 = {14, 0x0001 | 0x0800, 1, 2, 3, 4, 14};
-        REQUIRE(ev_packet.ParseData(data2) == true);
-        REQUIRE(ev_packet.get_seconds() == (1<<16 | 2));
-        REQUIRE(ev_packet.get_useconds() == (3<<16 | 4));
-    }
-    */
-
 }
 
 
