@@ -5,7 +5,7 @@ compiler:
 script:
    - mkdir build
    - cd build
-   - cmake ..
+   - cmake .. -Dtests=ON
    - make -j
    - make -j test
    - make -j install
