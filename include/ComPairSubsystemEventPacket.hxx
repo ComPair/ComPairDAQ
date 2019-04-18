@@ -18,7 +18,7 @@ class ComPairSubsystemEventPacket {
 	public:
 		virtual bool ParseData(const std::vector< uint16_t > &data) = 0;
 		//virtual uint32_t get_packet_nbytes() = 0;
-        bool ParseHeader(const std::vector<uint16_t> &data);
+        void ParseHeader(const std::vector<uint16_t> &data);
         uint32_t get_event_id() { return evtId; };
 		bool get_trigger_ack() { return trigger_ack; };
         uint16_t get_packet_header() { return packet_header; };

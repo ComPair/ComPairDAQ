@@ -1,0 +1,10 @@
+language: cpp
+compiler:
+   - gcc
+script:
+   - mkdir build
+   - cd build
+   - cmake .. -Dtests=ON -DWARNINGS_AS_ERRORS=ON
+   - make -j
+   - ctest --verbose
+   - make -j install

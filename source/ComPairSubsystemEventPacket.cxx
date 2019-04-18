@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 /// Parse the data packet header and set attributes.
-bool ComPairSubsystemEventPacket::ParseHeader(const std::vector<uint16_t> &data) {
+void ComPairSubsystemEventPacket::ParseHeader(const std::vector<uint16_t> &data) {
     uint16_t data0 = data.at(0);
     uint32_t data1 = uint16_pair_to_uint32(data.at(1), data.at(2));
     // Unpack data0
@@ -29,7 +29,7 @@ bool TrivialSubsystemEventPacket::ParseData(const std::vector<uint16_t> &data) {
 bool SimSubsystemEventPacket::ParseData(const std::vector<uint16_t> &data) {
     this->ParseHeader(data);
     nhit = data.at(3);
-    if (8*nhit + 5 != data.size()) {
+    if ((size_t)8*nhit + 5 != data.size()) {
         throw std::runtime_error("Packet length is not correct for given number of hits");
     }
     hit_x.resize(nhit);
