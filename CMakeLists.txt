@@ -16,6 +16,20 @@ message(STATUS "Installing to ${CMAKE_INSTALL_PREFIX}")
 
 option(tests "Enable tests" OFF)
 
+#Treat warnings as errors for testing.
+option(WARNINGS_AS_ERRORS "Treat all warnings as errors." OFF)
+
+if (WARNINGS_AS_ERRORS)
+	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+		list(APPEND CMAKE_CXX_FLAGS "-Wall -Wpedantic -Werror")
+	elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+		list(APPEND CMAKE_CXX_FLAGS "-Werror")
+	endif ()
+	message(STATUS "Warnings are being treated as errors.")
+endif(WARNINGS_AS_ERRORS)
+
+#Begin processing code
+
 include_directories(include)
 add_subdirectory(source)
 
