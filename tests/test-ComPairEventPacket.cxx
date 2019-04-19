@@ -1,6 +1,7 @@
 #include "catch.hpp"
 
 #include "ComPairEventPacket.hxx"
+#include "SimSubsystemEventPacket.hxx"
 
 TEST_CASE("EVENT_PACKET") {
 

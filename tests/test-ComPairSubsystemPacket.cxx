@@ -1,7 +1,7 @@
 #include "catch.hpp"
 #include "ComPairSubsystemEventPacket.hxx"
-
-#include <iostream>
+#include "TrivialSubsystemEventPacket.hxx"
+#include "SimSubsystemEventPacket.hxx"
 
 TEST_CASE("TRIVIAL_SUBSYSTEM_PACKET") {
 
