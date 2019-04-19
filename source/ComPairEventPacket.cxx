@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include "ComPairEventPacket.hxx"
+#include "SimSubsystemEventPacket.hxx"
 
 // Parse raw data buffer at `buf`.
 bool ComPairEventPacket::parse(std::vector<uint8_t> &data) {
