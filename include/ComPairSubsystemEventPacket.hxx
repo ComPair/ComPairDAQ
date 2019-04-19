@@ -4,32 +4,26 @@
 #include <cstdint>
 #include <vector>
 
-/// Helper function: concatenates a pair of uint16's into a single uint32.
-/**     ms_half: the most-significant half.
- *      ls_half: the least significant half.
- */
-inline uint32_t uint16_pair_to_uint32(uint16_t ms_half, uint16_t ls_half);
-
 /// ComPairSubsystemEventPacket: abstract base class for subsystem packet.
 /**    All sub-systems should define their own subclass of `ComPairSubsystemEventPacket`
  *     to deal with the unique sets of data being passed around.
  */
 class ComPairSubsystemEventPacket {
 	public:
-		virtual bool ParseData(const std::vector< uint16_t > &data) = 0;
-		//virtual uint32_t get_packet_nbytes() = 0;
-        void ParseHeader(const std::vector<uint16_t> &data);
-        uint32_t get_event_id() { return evtId; };
-		bool get_trigger_ack() { return trigger_ack; };
-        uint16_t get_packet_header() { return packet_header; };
-        uint16_t get_packet_type() { return packet_type; };
-        uint16_t get_crc() { return crc; };
+		virtual bool parse(std::vector< uint8_t > &data) = 0;
+		bool parse_uint16(std::vector<uint16_t> &data);
+        void parse_header(std::vector<uint8_t> &data);
+        uint32_t event_id() { return event_id_; };
+		bool trigger_ack() { return trigger_ack_; };
+        uint16_t packet_header() { return packet_header_; };
+        uint16_t packet_type() { return packet_type_; };
+        uint16_t crc() { return crc_; };
 	protected:
-		uint32_t evtId;
-		bool trigger_ack;
-        uint16_t packet_header;
-        uint16_t packet_type;
-        uint16_t crc;
+		uint32_t event_id_;
+		bool trigger_ack_;
+        uint16_t packet_header_;
+        uint16_t packet_type_;
+        uint16_t crc_;
 };
 
 /// A trivial packet structure for testing packet system.
@@ -44,7 +38,7 @@ class ComPairSubsystemEventPacket {
  */
 class TrivialSubsystemEventPacket : public ComPairSubsystemEventPacket {
     public:
-		bool ParseData(const std::vector< uint16_t > &data); 
+		bool parse(std::vector< uint8_t > &data); 
 };
 
 /// Packet for holding ideal data for a subsystem event.
@@ -56,20 +50,20 @@ class TrivialSubsystemEventPacket : public ComPairSubsystemEventPacket {
  */
 class SimSubsystemEventPacket : public ComPairSubsystemEventPacket {
     public:
-        bool ParseData(const std::vector<uint16_t> &data);
+        bool parse(std::vector<uint8_t> &data);
         void set_event_data(const std::vector<float> &x, const std::vector<float> &y,
                             const std::vector<float> &z, const std::vector<float> &E);
-        uint16_t get_nhit() { return nhit; };
-        float get_hit_x(int i) { return hit_x.at(i); };
-        float get_hit_y(int i) { return hit_y.at(i); };
-        float get_hit_z(int i) { return hit_z.at(i); };
-        float get_hit_E(int i) { return hit_E.at(i); };
+        uint16_t nhit() { return nhit_; };
+        float hit_x(int i) { return hit_x_.at(i); };
+        float hit_y(int i) { return hit_y_.at(i); };
+        float hit_z(int i) { return hit_z_.at(i); };
+        float hit_E(int i) { return hit_E_.at(i); };
     private:
-        uint16_t nhit;
-        std::vector<float> hit_x;
-        std::vector<float> hit_y;
-        std::vector<float> hit_z;
-        std::vector<float> hit_E;
+        uint16_t nhit_;
+        std::vector<float> hit_x_;
+        std::vector<float> hit_y_;
+        std::vector<float> hit_z_;
+        std::vector<float> hit_E_;
 };
 
 #endif // COMPAIR_SUBSYSTEM_EVENT_PACKET_HXX

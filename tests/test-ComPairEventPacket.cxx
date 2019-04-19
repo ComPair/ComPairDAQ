@@ -7,46 +7,46 @@ TEST_CASE("EVENT_PACKET") {
     ComPairEventPacket ev_packet;
 
     SECTION("Test trivial packet, with only the header and size.") {
-        std::vector<uint16_t> data = {14, 0, 0, 1, 0, 2, 14};
-        REQUIRE(ev_packet.ParseData(data) == true);
+        std::vector<uint16_t> data{14, 0, 0, 1, 0, 2, 14};
+        REQUIRE(ev_packet.parse(data) == true);
     }
 
     SECTION("Test that we parse source correctly") {
-        // This should end up being the Si0_SOURCE:
+        // This should end up being from the SI0 source
         std::vector<uint16_t> data = {14, 0x0001 | 0x0800, 0, 1, 0, 2, 14};
-        REQUIRE(ev_packet.ParseData(data) == true);
-        REQUIRE(ev_packet.get_source() == ComPairEventPacket::PacketSource::Si0_SOURCE);
+        REQUIRE(ev_packet.parse(data) == true);
+        REQUIRE(ev_packet.packet_source() == ComPairEventPacket::PacketSource::SI0);
     }
 
-    SECTION("Test that we are setting the packet type correctly to EVENT_PACKET") {
+    SECTION("Test that we are setting the packet type correctly to EVENT") {
         std::vector<uint16_t> data = {14, 0x0001 | 0x0800 | 1<<15, 0, 1, 0, 2, 14};
-        REQUIRE(ev_packet.ParseData(data) == true);
-        REQUIRE(ev_packet.get_source() == ComPairEventPacket::PacketSource::Si0_SOURCE);
-        REQUIRE(ev_packet.get_type() == ComPairEventPacket::PacketType::EVENT_PACKET);
+        REQUIRE(ev_packet.parse(data) == true);
+        REQUIRE(ev_packet.packet_source() == ComPairEventPacket::PacketSource::SI0);
+        REQUIRE(ev_packet.packet_type() == ComPairEventPacket::PacketType::EVENT);
     }
 
-    SECTION("Test that we are setting the packet type to MONITOR_PACKET") {
+    SECTION("Test that we are setting the packet type to MONITOR") {
         std::vector<uint16_t> data = {14, 0x0001 | 0x0800, 0, 1, 0, 2, 14};
-        REQUIRE(ev_packet.ParseData(data) == true);
-        REQUIRE(ev_packet.get_source() == ComPairEventPacket::PacketSource::Si0_SOURCE);
-        REQUIRE(ev_packet.get_type() == ComPairEventPacket::PacketType::MONITOR_PACKET);
+        REQUIRE(ev_packet.parse(data) == true);
+        REQUIRE(ev_packet.packet_source() == ComPairEventPacket::PacketSource::SI0);
+        REQUIRE(ev_packet.packet_type() == ComPairEventPacket::PacketType::MONITOR);
     }
 
     SECTION("Test setting seconds and useconds correctly") {
         std::vector<uint16_t> data0 = {14, 0x0001 | 0x0800, 0, 1, 0, 2, 14};
-        REQUIRE(ev_packet.ParseData(data0) == true);
-        REQUIRE(ev_packet.get_seconds() == 1);
-        REQUIRE(ev_packet.get_useconds() == 2);
+        REQUIRE(ev_packet.parse(data0) == true);
+        REQUIRE(ev_packet.seconds() == 1);
+        REQUIRE(ev_packet.useconds() == 2);
 
         std::vector<uint16_t> data1 = {14, 0x0001 | 0x0800, 1, 0, 2, 0, 14};
-        REQUIRE(ev_packet.ParseData(data1) == true);
-        REQUIRE(ev_packet.get_seconds() == (1<<16));
-        REQUIRE(ev_packet.get_useconds() == (2<<16));
+        REQUIRE(ev_packet.parse(data1) == true);
+        REQUIRE(ev_packet.seconds() == (1<<16));
+        REQUIRE(ev_packet.useconds() == (2<<16));
 
         std::vector<uint16_t> data2 = {14, 0x0001 | 0x0800, 1, 2, 3, 4, 14};
-        REQUIRE(ev_packet.ParseData(data2) == true);
-        REQUIRE(ev_packet.get_seconds() == (1<<16 | 2));
-        REQUIRE(ev_packet.get_useconds() == (3<<16 | 4));
+        REQUIRE(ev_packet.parse(data2) == true);
+        REQUIRE(ev_packet.seconds() == (1<<16 | 2));
+        REQUIRE(ev_packet.useconds() == (3<<16 | 4));
     }
 
      SECTION("An event packet") {
@@ -77,20 +77,18 @@ TEST_CASE("EVENT_PACKET") {
 
         data.at(0) = data.size() * 2;
         data.at(data.size() - 1) = data.size() * 2;
-        data.at(1) = uint16_t(ComPairEventPacket::PacketSource::SIM_SOURCE);
+        data.at(1) = uint16_t(ComPairEventPacket::PacketSource::SIM);
 
-        ev_packet.ParseData(data);
+        ev_packet.parse(data);
 
-        auto sim_packet = dynamic_cast< SimSubsystemEventPacket* >(ev_packet.GetSubsystemPacket());
+        auto sim_packet = dynamic_cast< SimSubsystemEventPacket* >(ev_packet.subsystem_packet());
 
-        REQUIRE(sim_packet->get_hit_x(0) == 1.0);
-        REQUIRE(sim_packet->get_hit_y(0) == 2.0);
-        REQUIRE(sim_packet->get_hit_z(0) == 3.0);
-        REQUIRE(sim_packet->get_hit_E(0) == 4.0);
+        REQUIRE(sim_packet->hit_x(0) == 1.0);
+        REQUIRE(sim_packet->hit_y(0) == 2.0);
+        REQUIRE(sim_packet->hit_z(0) == 3.0);
+        REQUIRE(sim_packet->hit_E(0) == 4.0);
 
      }
 
 }
 
-
-// vim: set ts=4 sw=4 sts=4 et:
