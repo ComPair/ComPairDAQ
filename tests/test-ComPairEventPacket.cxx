@@ -60,18 +60,12 @@ TEST_CASE("EVENT_PACKET") {
 
         subsystemData.at(3) = 1; // Setting number of hits
         // x, y, z, E: 1.0, 2.0, 3.0, 4.0
-        float fval = 1.0;
-        int indx = 4;
-        uint32_t *uval = reinterpret_cast<uint32_t *>(&fval);
-        uint16_t mshalf, lshalf;
-        for (int cnt=0; cnt<4; cnt++) {
-            mshalf = (*uval >> 16) & 0x0000FFFF;
-            lshalf = *uval & 0x0000FFFF;
-            subsystemData.at(indx++) = mshalf;
-            subsystemData.at(indx++) = lshalf;
-            fval += 1.0;
+        float fvals[] = {1.0, 2.0, 3.0, 4.0};
+        float *pfdata = reinterpret_cast<float*>(subsystemData.data() + 4);
+        for (int i=0; i<4; i++) {
+            *pfdata = fvals[i];
+            pfdata++;
         }
-
         std::vector< uint16_t > data (subsystemData.size() + 7);
         std::copy(subsystemData.begin(), subsystemData.end(), data.begin() + 6);
 
